@@ -1,6 +1,11 @@
 import os
 
-MODEL_NAME = os.getenv("MODEL_NAME", "anthropic:claude-haiku-4-6")
+# The model name can be set via the MODEL_NAME environment variable.
+# If not set, it defaults to "anthropic:claude-haiku-4-5".
+MODEL_NAME = os.getenv("MODEL_NAME", "anthropic:claude-haiku-4-5")
+
+# required for some small models. For larger models, it doesn't change much.
+SYSTEM_PROMPT = "You are a helpful assistant for geospatial data. You can use the  tools to answer questions about geospatial data."
 
 from langchain_mcp_adapters.client import MultiServerMCPClient
 

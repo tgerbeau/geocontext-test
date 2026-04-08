@@ -1,18 +1,22 @@
 import pytest
 
-from langchain.chat_models import init_chat_model
 from langchain.agents import create_agent
+from langchain.chat_models import init_chat_model
 from config import MODEL_NAME, SYSTEM_PROMPT, get_mcp_client
 
-USER_INPUT = "Dans quelle table peut-on trouver des informations sur les bâtiments?"
+USER_INPUT = "Dans quelle table peut-on trouver des informations sur les écoles?"
 
 @pytest.mark.asyncio
-async def test_chaining_geocode_altitude():
+async def test_search_ecoles():
     client = get_mcp_client()
     tools = await client.get_tools()
 
     model = init_chat_model(MODEL_NAME,temperature=0.0)
-    agent = create_agent(model=model,tools=tools, system_prompt=SYSTEM_PROMPT)
+    agent = create_agent(
+        model=model,
+        tools=tools, 
+        system_prompt=SYSTEM_PROMPT
+    )
     assert agent is not None
     
     result = await agent.ainvoke({"messages": [{"role": "user", "content": USER_INPUT}]})
@@ -20,8 +24,5 @@ async def test_chaining_geocode_altitude():
     last_message = result["messages"][-1]
     message_text = str(last_message)
 
-    print(last_message.pretty_print())
-
-    assert "BDTOPO_V3:batiment" in message_text
-    assert "CADASTRALPARCELS.PARCELLAIRE_EXPRESS:batiment" in message_text
+    assert "ERP" in message_text
 

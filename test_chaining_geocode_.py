@@ -1,21 +1,72 @@
 import pytest
 import re
+from unittest.mock import AsyncMock
 
+from langchain.chat_models import init_chat_model
 from langchain.agents import create_agent
+from langchain_core.callbacks.base import BaseCallbackHandler
 from config import MODEL_NAME, get_mcp_client
+
+USER_INPUT = "Quelle est l'altitude de la mairie de Chamonix?"
+
+class ToolCallTracker(BaseCallbackHandler):
+    """Callback handler to track tool calls during agent execution."""
+    def __init__(self):
+        self.tool_calls = []
+        
+    def on_tool_start(self, serialized, input_str, **kwargs):
+        tool_name = serialized.get("name", "unknown")
+        self.tool_calls.append({
+            "name": tool_name,
+            "input": input_str,
+            "type": "start"
+        })
+        print(f"[TOOL CALL] Starting tool: {tool_name} with input: {input_str}")
+
+    def on_tool_end(self, output, **kwargs):
+        self.tool_calls.append({
+            "output": output,
+            "type": "end"
+        })
+        print(f"[TOOL RESULT] Tool output: {output}")
 
 @pytest.mark.asyncio
 async def test_chaining_geocode_altitude():
     client = get_mcp_client()
     tools = await client.get_tools()
 
-    agent = create_agent(MODEL_NAME,tools=tools, 
+    geocode_tool = next((t for t in tools if t.name == "geocode"), None)
+    assert geocode_tool is not None, "Tool 'geocode' not found"
+
+    altitude_tool = next((t for t in tools if t.name == "altitude"), None)
+    assert altitude_tool is not None, "Tool 'altitude' not found"
+
+    model = init_chat_model(MODEL_NAME,temperature=0.0)
+    agent = create_agent(
+        model=model,
+        tools=tools, 
         system_prompt="You are a helpful assistant for geospatial data. You can use the following tools to answer questions about geospatial data: {tools}. Always use these tools when relevant to answer the user's question."
     )
     assert agent is not None
 
-    question = "Quelle est l'altitude de la mairie de Chamonix?"
-    result = await agent.ainvoke({"messages": [{"role": "user", "content": question}]})
+    # Create tool call tracker
+    tracker = ToolCallTracker()
+    
+    # Invoke agent with callback handler to track tool calls
+    result = await agent.ainvoke(
+        {"messages": [{"role": "user", "content": USER_INPUT}]},
+        config={"callbacks": [tracker]}
+    )
+
+    # Verify that geocode tool was called
+    geocode_calls = [call for call in tracker.tool_calls if call.get("name") == "geocode" and call.get("type") == "start"]
+    assert len(geocode_calls) > 0, "geocode tool was not called"
+    print(f"✓ geocode tool was called {len(geocode_calls)} time(s)")
+
+    # Verify that altitude tool was called
+    altitude_calls = [call for call in tracker.tool_calls if call.get("name") == "altitude" and call.get("type") == "start"]
+    assert len(altitude_calls) > 0, "altitude tool was not called"
+    print(f"✓ altitude tool was called {len(altitude_calls)} time(s)")
 
     last_message = result["messages"][-1]
     message_text = str(last_message).replace("\u202f", " ").replace("\xa0", " ")
