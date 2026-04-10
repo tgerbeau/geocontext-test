@@ -31,3 +31,15 @@ export GOOGLE_API_KEY=YourKey
 
 uv run pytest
 ```
+
+```bash
+export MODEL_NAME="google_genai:gemini-3.1-flash-lite-preview"
+export GOOGLE_API_KEY=YourKey
+
+uv run pytest
+```
+
+## License
+
+[MIT](LICENSE)
+
