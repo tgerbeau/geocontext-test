@@ -39,6 +39,13 @@ export GOOGLE_API_KEY=YourKey
 uv run pytest
 ```
 
+## Tests
+
+- [test_france_capital.py](test_france_capital.py) - basic test without the MCP
+- [test_chaining_geocode.py](test_chaining_geocode.py) - ensure that LLM can chain `geocode(str)->[lon,lat]` and `altitude(lon,lat) -> z`
+- [test_search_batiment.py](test_search_batiment.py) - test search with "bâtiment" (*building*)
+- [test_search_ecoles.py](test_search_ecoles.py) - test search with "écoles" (*schools*) - **UNSTABLE**
+
 ## License
 
 [MIT](LICENSE)
