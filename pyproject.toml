@@ -1,7 +1,7 @@
 [project]
 name = "geocontext-test"
 version = "0.1.0"
-description = "Add your description here"
+description = "Integration test suite to validate the correct behavior of the MCP ignfab/geocontext with different models"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
