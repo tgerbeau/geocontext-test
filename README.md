@@ -88,6 +88,29 @@ uv run pytest
 - **`test_urbanisme`** est sujet à de la flakiness LLM : le modèle `claude-haiku-4-5` ne chaîne pas toujours correctement les appels d'outils (propriétés inventées, mauvais identifiants). Il passe environ 1 fois sur 2.
 - Les 10 outils MCP (`adminexpress`, `altitude`, `assiette_sup`, `cadastre`, `geocode`, `gpf_wfs_describe_type`, `gpf_wfs_get_feature_by_id`, `gpf_wfs_get_features`, `gpf_wfs_search_types`, `urbanisme`) sont tous couverts.
 
+## Couverture des outils MCP
+
+| Outil | Test direct | Test en chaînage | Couvert |
+|-------|------------|-----------------|---------|
+| `geocode` | — | 5 tests de chaînage | ✅ |
+| `altitude` | — | `test_chaining_geocode` | ✅ |
+| `adminexpress` | `test_adminexpress` | `test_chaining_geocode_adminexpress` | ✅ |
+| `cadastre` | `test_cadastre` | `test_chaining_cadastre_urbanisme` | ✅ |
+| `urbanisme` | `test_urbanisme` | `test_chaining_cadastre_urbanisme` | ✅ (flaky) |
+| `assiette_sup` | — | `test_chaining_geocode_assiette_sup` | ✅ |
+| `gpf_wfs_search_types` | `test_search_batiment`, `test_search_ecoles` | `test_chaining_discovery` | ✅ |
+| `gpf_wfs_describe_type` | `test_describe_type` | `test_chaining_discovery` | ✅ |
+| `gpf_wfs_get_features` | `test_get_features` | `test_chaining_discovery` | ✅ |
+| `gpf_wfs_get_feature_by_id` | — | — | ❌ Non couvert |
+
+## Cas critiques non couverts
+
+| Cas | Criticité | Description |
+|-----|-----------|-------------|
+| `gpf_wfs_get_feature_by_id` direct | **Haute** | Seul outil sans test dédié — utilisé indirectement par le LLM dans `test_urbanisme` mais jamais validé explicitement |
+| Erreur réseau / tool error recovery | Moyenne | Pas de test sur la capacité de l'agent à retenter après une erreur d'outil |
+| Coordonnées hors France / input invalide | Moyenne | Aucun test négatif — comportement inconnu avec des entrées invalides |
+
 ## License
 
 [MIT](LICENSE)
