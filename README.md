@@ -53,62 +53,40 @@ uv run pytest
 | `test_chaining_geocode` | [test_chaining_geocode.py](test_chaining_geocode.py) | `geocode` → `altitude` | Chaînage géocodage + altitude (mairie de Chamonix ≈ 1036m) |
 | `test_chaining_cadastre_urbanisme` | [test_chaining_cadastre_urbanisme.py](test_chaining_cadastre_urbanisme.py) | `geocode` → `cadastre` → `urbanisme` | Chaînage géocodage, cadastre et urbanisme |
 | `test_urbanisme` | [test_urbanisme.py](test_urbanisme.py) | `urbanisme` | Règles d'urbanisme pour la parcelle 94067000AI0042 |
+| `test_chaining_geocode_adminexpress` | [test_chaining_geocode_adminexpress.py](test_chaining_geocode_adminexpress.py) | `geocode` → `adminexpress` | Chaînage géocodage + commune/département (1 rue de Rivoli) |
+| `test_chaining_geocode_assiette_sup` | [test_chaining_geocode_assiette_sup.py](test_chaining_geocode_assiette_sup.py) | `geocode` → `assiette_sup` | Chaînage géocodage + servitudes d'utilité publique (Lyon) |
+| `test_chaining_discovery` | [test_chaining_discovery.py](test_chaining_discovery.py) | `gpf_wfs_search_types` → `gpf_wfs_describe_type` → `gpf_wfs_get_features` | Découverte complète : recherche, description et interrogation (cours d'eau à Toulouse) |
 
 ## Derniers résultats de tests
 
 **Date** : 11 mai 2026
 **Modèle** : `anthropic:claude-haiku-4-5`
 **Serveur MCP** : `geocontext@0.9.7`
+**Nombre de tests** : 13
 
-### Run 1 — 10/10 passed (2 min 07 s)
-
-| Test | Résultat |
-|------|----------|
-| test_adminexpress | ✅ PASSED |
-| test_cadastre | ✅ PASSED |
-| test_chaining_cadastre_urbanisme | ✅ PASSED |
-| test_chaining_geocode_altitude | ✅ PASSED |
-| test_describe_type | ✅ PASSED |
-| test_france_capital | ✅ PASSED |
-| test_get_features | ✅ PASSED |
-| test_search_batiment | ✅ PASSED |
-| test_search_ecoles | ✅ PASSED |
-| test_urbanisme | ✅ PASSED |
-
-### Run 2 — 9/10 passed (2 min 01 s)
+### Run — 12/13 passed (2 min 38 s)
 
 | Test | Résultat | Détail |
 |------|----------|--------|
 | test_adminexpress | ✅ PASSED | |
 | test_cadastre | ✅ PASSED | |
 | test_chaining_cadastre_urbanisme | ✅ PASSED | |
+| test_chaining_discovery | ✅ PASSED | |
 | test_chaining_geocode_altitude | ✅ PASSED | |
+| test_chaining_geocode_adminexpress | ✅ PASSED | |
+| test_chaining_geocode_assiette_sup | ✅ PASSED | |
 | test_describe_type | ✅ PASSED | |
 | test_france_capital | ✅ PASSED | |
 | test_get_features | ✅ PASSED | |
 | test_search_batiment | ✅ PASSED | |
 | test_search_ecoles | ✅ PASSED | |
-| test_urbanisme | ❌ FAILED | Flaky LLM — propriété inexistante demandée par le modèle |
-
-### Run 3 — 9/10 passed (1 min 51 s)
-
-| Test | Résultat | Détail |
-|------|----------|--------|
-| test_adminexpress | ✅ PASSED | |
-| test_cadastre | ✅ PASSED | |
-| test_chaining_cadastre_urbanisme | ✅ PASSED | |
-| test_chaining_geocode_altitude | ✅ PASSED | |
-| test_describe_type | ✅ PASSED | |
-| test_france_capital | ✅ PASSED | |
-| test_get_features | ✅ PASSED | |
-| test_search_batiment | ✅ PASSED | |
-| test_search_ecoles | ✅ PASSED | |
-| test_urbanisme | ❌ FAILED | Flaky LLM — feature introuvable |
+| test_urbanisme | ❌ FAILED | Flaky LLM — mauvais identifiant de feature |
 
 ### Observations
 
-- **9 tests sur 10 sont stables** à 100% sur les 3 runs.
-- **`test_urbanisme`** est sujet à de la flakiness LLM : le modèle `claude-haiku-4-5` ne chaîne pas toujours correctement les appels d'outils (propriétés inventées, mauvais identifiants). Il passe ~50% du temps.
+- **12 tests sur 13 sont stables** à 100%.
+- **`test_urbanisme`** est sujet à de la flakiness LLM : le modèle `claude-haiku-4-5` ne chaîne pas toujours correctement les appels d'outils (propriétés inventées, mauvais identifiants). Il passe environ 1 fois sur 2.
+- Les 10 outils MCP (`adminexpress`, `altitude`, `assiette_sup`, `cadastre`, `geocode`, `gpf_wfs_describe_type`, `gpf_wfs_get_feature_by_id`, `gpf_wfs_get_features`, `gpf_wfs_search_types`, `urbanisme`) sont tous couverts.
 
 ## License
 
