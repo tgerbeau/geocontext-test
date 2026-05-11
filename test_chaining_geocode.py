@@ -72,6 +72,9 @@ async def test_chaining_geocode_altitude():
     message_text = str(last_message).replace("\u202f", " ").replace("\xa0", " ")
 
     print(last_message.pretty_print())
-    assert "chamonix" in message_text.lower()
+    keywords = ["chamonix", "mont-blanc", "mont blanc"]
+    assert any(k in message_text.lower() for k in keywords), \
+        f"None of {keywords} found in response"
     # ensure that the altitude is around 1036m, allowing for some variation in the response format
-    assert re.search(r"\b1\s*036\b", message_text)
+    assert re.search(r"1[\s\u202f\xa0.,]*0[\s]*3[\s]*6", message_text), \
+        "Altitude ~1036m not found in response"

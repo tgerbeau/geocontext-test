@@ -5,7 +5,7 @@ from langchain.chat_models import init_chat_model
 from langchain_core.callbacks.base import BaseCallbackHandler
 from config import MODEL_NAME, SYSTEM_PROMPT, get_mcp_client
 
-USER_INPUT = "Dans quelle table peut-on trouver des informations sur les écoles?"
+USER_INPUT = "Quelle est la parcelle cadastrale au 73 avenue de Paris, Saint-Mandé?"
 
 
 class ToolCallTracker(BaseCallbackHandler):
@@ -17,16 +17,15 @@ class ToolCallTracker(BaseCallbackHandler):
 
 
 @pytest.mark.asyncio
-async def test_search_ecoles():
+async def test_cadastre():
     client = get_mcp_client()
     tools = await client.get_tools()
 
+    cadastre_tool = next((t for t in tools if t.name == "cadastre"), None)
+    assert cadastre_tool is not None, "Tool 'cadastre' not found"
+
     model = init_chat_model(MODEL_NAME, temperature=0.0)
-    agent = create_agent(
-        model=model,
-        tools=tools,
-        system_prompt=SYSTEM_PROMPT
-    )
+    agent = create_agent(model=model, tools=tools, system_prompt=SYSTEM_PROMPT)
     assert agent is not None
 
     tracker = ToolCallTracker()
@@ -35,13 +34,12 @@ async def test_search_ecoles():
         config={"callbacks": [tracker]},
     )
 
-    search_calls = [c for c in tracker.tool_calls if c.get("name") == "gpf_wfs_search_types"]
-    assert len(search_calls) > 0, "gpf_wfs_search_types tool was not called"
+    cadastre_calls = [c for c in tracker.tool_calls if c.get("name") == "cadastre"]
+    assert len(cadastre_calls) > 0, "cadastre tool was not called"
 
     last_message = result["messages"][-1]
     message_text = str(last_message).lower()
 
-    keywords = ["erp", "école", "ecole", "enseignement", "zone_d_activite", "bdtopo", "scolaire"]
+    keywords = ["saint-mandé", "saint mandé", "saint mande", "parcelle", "cadastr"]
     assert any(k in message_text for k in keywords), \
         f"None of {keywords} found in response"
-

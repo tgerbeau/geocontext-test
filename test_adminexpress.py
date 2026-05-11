@@ -5,7 +5,7 @@ from langchain.chat_models import init_chat_model
 from langchain_core.callbacks.base import BaseCallbackHandler
 from config import MODEL_NAME, SYSTEM_PROMPT, get_mcp_client
 
-USER_INPUT = "Dans quelle table peut-on trouver des informations sur les écoles?"
+USER_INPUT = "Dans quelle commune et quel département se trouve le point de coordonnées longitude 2.35, latitude 48.85?"
 
 
 class ToolCallTracker(BaseCallbackHandler):
@@ -17,16 +17,15 @@ class ToolCallTracker(BaseCallbackHandler):
 
 
 @pytest.mark.asyncio
-async def test_search_ecoles():
+async def test_adminexpress():
     client = get_mcp_client()
     tools = await client.get_tools()
 
+    admin_tool = next((t for t in tools if t.name == "adminexpress"), None)
+    assert admin_tool is not None, "Tool 'adminexpress' not found"
+
     model = init_chat_model(MODEL_NAME, temperature=0.0)
-    agent = create_agent(
-        model=model,
-        tools=tools,
-        system_prompt=SYSTEM_PROMPT
-    )
+    agent = create_agent(model=model, tools=tools, system_prompt=SYSTEM_PROMPT)
     assert agent is not None
 
     tracker = ToolCallTracker()
@@ -35,13 +34,12 @@ async def test_search_ecoles():
         config={"callbacks": [tracker]},
     )
 
-    search_calls = [c for c in tracker.tool_calls if c.get("name") == "gpf_wfs_search_types"]
-    assert len(search_calls) > 0, "gpf_wfs_search_types tool was not called"
+    admin_calls = [c for c in tracker.tool_calls if c.get("name") == "adminexpress"]
+    assert len(admin_calls) > 0, "adminexpress tool was not called"
 
     last_message = result["messages"][-1]
     message_text = str(last_message).lower()
 
-    keywords = ["erp", "école", "ecole", "enseignement", "zone_d_activite", "bdtopo", "scolaire"]
+    keywords = ["paris", "75", "île-de-france", "ile-de-france"]
     assert any(k in message_text for k in keywords), \
         f"None of {keywords} found in response"
-
