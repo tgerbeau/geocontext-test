@@ -59,12 +59,12 @@ uv run pytest
 
 ## Derniers résultats de tests
 
-**Date** : 11 mai 2026
+**Date** : 12 mai 2026
 **Modèle** : `anthropic:claude-haiku-4-5`
 **Serveur MCP** : `geocontext@0.9.7`
 **Nombre de tests** : 13
 
-### Run — 12/13 passed (2 min 38 s)
+### Run — 12/13 passed (2 min 31 s)
 
 | Test | Résultat | Détail |
 |------|----------|--------|
@@ -80,12 +80,12 @@ uv run pytest
 | test_get_features | ✅ PASSED | |
 | test_search_batiment | ✅ PASSED | |
 | test_search_ecoles | ✅ PASSED | |
-| test_urbanisme | ❌ FAILED | Flaky LLM — mauvais identifiant de feature |
+| test_urbanisme | ❌ FAILED | Flaky LLM — l'outil urbanisme n'a pas été appelé |
 
 ### Observations
 
 - **12 tests sur 13 sont stables** à 100%.
-- **`test_urbanisme`** est sujet à de la flakiness LLM : le modèle `claude-haiku-4-5` ne chaîne pas toujours correctement les appels d'outils (propriétés inventées, mauvais identifiants). Il passe environ 1 fois sur 2.
+- **`test_urbanisme`** est sujet à de la flakiness LLM : le modèle `claude-haiku-4-5` ne chaîne pas toujours correctement les appels d'outils (outil non appelé, propriétés inventées, mauvais identifiants). Il passe environ 1 fois sur 2.
 - Les 10 outils MCP (`adminexpress`, `altitude`, `assiette_sup`, `cadastre`, `geocode`, `gpf_wfs_describe_type`, `gpf_wfs_get_feature_by_id`, `gpf_wfs_get_features`, `gpf_wfs_search_types`, `urbanisme`) sont tous couverts.
 
 ## Couverture des outils MCP
